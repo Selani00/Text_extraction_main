@@ -183,12 +183,12 @@ def validate_Lenght_Width_Height(text):
     
     match = re.findall(pattern, text)
     
-    # Initialize the default values
+    
     length = "CM"
     width = "CM"
     height = "CM"
 
-    # Assign values based on the number of matches found
+    
     if len(match) > 0:
         length = f"{match[0]} CM"
     if len(match) > 1:
@@ -196,16 +196,16 @@ def validate_Lenght_Width_Height(text):
     if len(match) > 2:
         height = f"{match[2]} CM"
 
-    # Return the formatted string with available values
+
     return f"{length} {width} {height}"
 
 
 def validate_provincialCouncil(text, registration_number):
-    # List of valid provinces
+    
     provinces = ["Western", "Central", "Southern", "Northern", "Eastern", 
                  "North-Western", "North-Central", "Uva", "Sabaragamuwa"]
     
-    # Map based on first two letters of the registration number
+
     province_mapping = {
         "WP": "Western",
         "CP": "Central",
@@ -217,19 +217,16 @@ def validate_provincialCouncil(text, registration_number):
         "UP": "Uva",
         "SB": "Sabaragamuwa"
     }
-
-    # Check if the extracted text contains any province from the array
+   
     for province in provinces:
         if province in text:
             return province    
     
 
-    # If the registration number is available, extract the first two letters
     if registration_number and len(registration_number) >= 2:
         first_two_letters = registration_number[:2]
         return province_mapping.get(first_two_letters, "Western")
     
-    # If no province is found, return "Western Province" by default
     return "Western"
 
 

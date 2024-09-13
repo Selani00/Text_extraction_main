@@ -11,28 +11,23 @@ def correct_word_ignore_case(word, possibilities):
     matches = difflib.get_close_matches(word_lower, possibilities_lower, n=1, cutoff=0.6)
     
     if matches:
-        # Find the original case-sensitive word from the possibilities list
         original_word = possibilities[possibilities_lower.index(matches[0])]
         return original_word
     return None
 
-# Helper function to save data to the same Excel file
+# Function to save data to the same Excel file
 def save_data_to_excel(detected_texts, accuracy, visibility, image_id):
-    # Define the Excel file name
     excel_filename = 'detected_text_data_n.xlsx'
     
-    # Check if the file already exists
+    # if file already exists
     if os.path.exists(excel_filename):
-        # Load the existing file
         df_existing = pd.read_excel(excel_filename, engine='openpyxl')
-        # Determine the next auto-increment number
         next_auto_increment = len(df_existing) + 1
     else:
-        # If the file doesn't exist, start with auto-increment number 1
+        # If the file doesn't exist
         next_auto_increment = 1
         df_existing = pd.DataFrame()
 
-    # Prepare the new row data
     new_row_data = {
         'ID': next_auto_increment,
         'Date and Time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -41,7 +36,7 @@ def save_data_to_excel(detected_texts, accuracy, visibility, image_id):
         'Visibility': f"{visibility:.2f}%"
     }
     
-    # Add the detected text fields to the new row
+    
     for field, text in detected_texts.items():
         new_row_data[field] = text
 
@@ -57,9 +52,8 @@ def save_data_to_excel(detected_texts, accuracy, visibility, image_id):
     print(f"Data appended to {excel_filename}")
 
 
-# Helper function to calculate visibility percentage
+# Function for calculate visibility percentage
 def calculate_visibility(image):
-    # Convert to OpenCV format for image processing
     image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
 
@@ -70,10 +64,8 @@ def calculate_visibility(image):
 
     return visibility_percentage
 
-# Helper function to clear the image
+# Function for clear the image
 def clear_image(image):
-
-    print("Clearing the image")
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
     horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 1))
@@ -88,7 +80,7 @@ def clear_image(image):
     return result
 
 
-# Helper function to identify the type of the image
+# Fucntion for identify the type of the image
 def identify_image_type(image):
     image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     ref_image1 = cv2.imread('Images/1.jpg')

@@ -18,7 +18,7 @@ from model import predict_country_of_origin
 
 app = Flask(__name__)
 
-# Initialize Tesseract and the zero-shot classifier
+
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 classifier = pipeline('zero-shot-classification', model='facebook/bart-large-mnli')
 
@@ -27,7 +27,7 @@ def extract_text_from_image():
     # Get the image from the request
     image = get_image_from_request(request)
 
-    # Resize the image (in-memory processing)
+    # Resize the image 
     resized_image = resize_image(image, (2481, 3507))
 
     # Crop the image based on outer box
@@ -75,9 +75,8 @@ def resize_image(image, dimension):
     return image.resize(dimension)
 
 
-# Function to crop the image based on the outer box (in-memory processing)
+# Function to crop the image based on the outer box 
 def crop_image(image):
-    # Convert to OpenCV image format
     image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
@@ -89,7 +88,6 @@ def crop_image(image):
     y = max(0, y - margin)
     h = h + margin
 
-    # Crop the image in-memory
     cropped_image_cv = image_cv[y:y+h, x:x+w]
     cropped_image_pil = Image.fromarray(cv2.cvtColor(cropped_image_cv, cv2.COLOR_BGR2RGB))
     return cropped_image_pil
@@ -98,30 +96,25 @@ def crop_image(image):
 def adjust_box(x, y, w, h, image_cv, confidence_threshold=50):
     box_confidence_2 = 0
 
-    # First adjustment (initial decrease in x and y)
     new_x = max(0, int(x - 10))
     new_y1 = max(0, int(y - 50))
 
-    # Recalculate the confidence with the new adjusted box
     roi = image_cv[new_y1:new_y1 + h, new_x:new_x + w]
     custom_config = r'--oem 3 --psm 6 -l eng'
     d = pytesseract.image_to_data(roi, config=custom_config, output_type=pytesseract.Output.DICT)
 
-    # Extract valid confidence values (ignoring -1)
     valid_confidences = [int(conf) for conf in d['conf'] if int(conf) != -1]
     box_confidence_1 = np.mean(valid_confidences) if valid_confidences else 0
     
-
     # Check if the box confidence is still below the threshold
     if box_confidence_1 < confidence_threshold:
        
         new_y2 = max(0, int(y + 50))
 
-        # Recalculate confidence with the second adjustment
+        
         roi = image_cv[new_y2:new_y2 + h, new_x:new_x + w]
         d = pytesseract.image_to_data(roi, config=custom_config, output_type=pytesseract.Output.DICT)
 
-        # Extract valid confidence values (ignoring -1)
         valid_confidences = [int(conf) for conf in d['conf'] if int(conf) != -1]
         box_confidence_2 = np.mean(valid_confidences) if valid_confidences else 0
         
@@ -141,14 +134,13 @@ def adjust_box(x, y, w, h, image_cv, confidence_threshold=50):
 
     return new_x, new_y, box_confidence
 
+
+
 # Function to get the most common value from the Excel file
 def get_most_common_value(field_label):
-    # Read the excel file
     if os.path.exists('detected_text_data_n.xlsx'):
         df = pd.read_excel('detected_text_data_n.xlsx')
-        # Check if field_label exists in the dataframe
         if field_label in df.columns:
-            # Get the counts of each value
             value_counts = df[field_label].value_counts()
             if not value_counts.empty:
                 max_count = value_counts.max()
@@ -156,7 +148,7 @@ def get_most_common_value(field_label):
                 # Randomly select one if multiple
                 selected_value = random.choice(most_common_values)
                 return selected_value
-    return None  # If no data available
+    return None 
 
 
 # Main function to extract text with dynamic box adjustment
@@ -169,9 +161,8 @@ def extract_text_with_accuracy(image, Type):
     make = ''
     model = ''
     
-    # Iterate over each bounding box
     for i, (x, y, w, h) in enumerate(boxes):
-        adjusted = False  # Keep track if the box was adjusted
+        adjusted = False  
         
         # Draw the bounding box for visualization
         cv2.rectangle(image_cv, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -179,7 +170,7 @@ def extract_text_with_accuracy(image, Type):
         # Crop the region of interest (ROI) from the image
         roi = image_cv[y:y + h, x:x + w]
 
-        # Clear the image if Type is 1
+        # Clear the image if Type is 2
         if Type == 2:
             roi = clear_image(roi)
 
@@ -187,21 +178,21 @@ def extract_text_with_accuracy(image, Type):
         custom_config = r'--oem 3 --psm 6 -l eng'
         d = pytesseract.image_to_data(roi, config=custom_config, output_type=pytesseract.Output.DICT)
 
-        # Extract valid confidence values (ignoring -1)
+    
         valid_confidences = [int(conf) for conf in d['conf'] if int(conf) != -1]
 
-        # Only consider boxes with valid confidence values
+        
         if valid_confidences:
             box_confidence = np.mean(valid_confidences)
             total_confidence += box_confidence
             valid_boxes += 1
 
-            # Adjust the box if the confidence is too low
+            
             if box_confidence < 30:
                 xn, yn, box_confidence_n = adjust_box(x, y, w, h, image_cv, confidence_threshold=50)
                 adjusted = True
 
-        # Re-extract text after adjusting the box (if necessary)
+        
         if adjusted:
             if(box_confidence_n > box_confidence):
                 x, y, box_confidence = xn, yn, box_confidence_n
@@ -209,10 +200,10 @@ def extract_text_with_accuracy(image, Type):
             roi = image_cv[y:y + h, x:x + w]
             d = pytesseract.image_to_data(roi, config=custom_config, output_type=pytesseract.Output.DICT)
 
-        # Initialize detected_text with an empty string
+        
         detected_text = ""
 
-        # Extract text
+        
         text = ' '.join([d['text'][i] for i in range(len(d['text'])) if int(d['conf'][i]) != -1])
 
         field_label = labels[i]
@@ -228,10 +219,10 @@ def extract_text_with_accuracy(image, Type):
             else:
                 detected_text = text
         else:
-            # If no text is extracted, default to empty string
+            
             detected_text = ''
 
-        # Validate the extracted text based on the field label
+        
         validated_text = validate_extracted_text(field_label, detected_text, registration_number)
 
         # If validation fails and the field is among the specified labels, get the most common value from Excel
@@ -242,7 +233,6 @@ def extract_text_with_accuracy(image, Type):
                 total_confidence += 10
 
 
-        # If the field is 'Registration No', update the registration_number variable
         if field_label == 'Registration No':
             registration_number = validated_text
         if field_label == 'Make':
@@ -250,6 +240,7 @@ def extract_text_with_accuracy(image, Type):
         if field_label == 'Model':
             model = validated_text
 
+        # Predict the country of origin if it's missing
         if 'Country of Origin' not in validated_texts or not validated_texts['Country of Origin']:
             if make and model:
                 make_input = make.strip()
@@ -270,7 +261,6 @@ def extract_text_with_accuracy(image, Type):
         if validated_texts[field_label] != text:
             total_confidence += 10
 
-    # Calculate the overall accuracy based on valid boxes
     accuracy = total_confidence / valid_boxes if valid_boxes > 0 else 0
 
     return validated_texts, accuracy
