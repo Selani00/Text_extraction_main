@@ -7,6 +7,9 @@ import pytesseract
 from transformers import pipeline
 from langdetect import LangDetectException
 import io
+import pandas as pd
+import os
+import random
 
 from utils import labels, boxes,word_lists
 from functions import calculate_visibility, clear_image, identify_image_type,save_data_to_excel,correct_word_ignore_case
@@ -137,6 +140,24 @@ def adjust_box(x, y, w, h, image_cv, confidence_threshold=50):
 
     return new_x, new_y, box_confidence
 
+# Function to get the most common value from the Excel file
+def get_most_common_value(field_label):
+    # Read the excel file
+    if os.path.exists('detected_text_data_n.xlsx'):
+        df = pd.read_excel('detected_text_data_n.xlsx')
+        # Check if field_label exists in the dataframe
+        if field_label in df.columns:
+            # Get the counts of each value
+            value_counts = df[field_label].value_counts()
+            if not value_counts.empty:
+                max_count = value_counts.max()
+                most_common_values = value_counts[value_counts == max_count].index.tolist()
+                # Randomly select one if multiple
+                selected_value = random.choice(most_common_values)
+                return selected_value
+    return None  # If no data available
+
+
 # Main function to extract text with dynamic box adjustment
 def extract_text_with_accuracy(image, Type):
     validated_texts = {}
@@ -144,6 +165,8 @@ def extract_text_with_accuracy(image, Type):
     total_confidence = 0
     valid_boxes = 0
     registration_number = ''
+    make = ''
+    model = ''
     
     # Iterate over each bounding box
     for i, (x, y, w, h) in enumerate(boxes):
@@ -211,9 +234,20 @@ def extract_text_with_accuracy(image, Type):
         # Validate the extracted text based on the field label
         validated_text = validate_extracted_text(field_label, detected_text, registration_number)
 
+        # If validation fails and the field is among the specified labels, get the most common value from Excel
+        if not validated_text and field_label in ["Class of Vehicle", "Status when Registered", "Fuel Type", "Make", "Model", "Type of Body", "Color"]:
+            excel_value = get_most_common_value(field_label)
+            if excel_value:
+                validated_text = excel_value
+
+
         # If the field is 'Registration No', update the registration_number variable
         if field_label == 'Registration No':
             registration_number = validated_text
+        if field_label == 'Make':
+            make = validated_text
+        if field_label == 'Model':
+            model = validated_text
 
         validated_texts[field_label] = validated_text
 

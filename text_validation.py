@@ -125,7 +125,7 @@ def validate_cylinder_capacity(text):
     if match:
         return f"{match[0]}.00 CC"
     
-    return ''
+    return '0.00 CC'
 
 def validate_class_of_vehicle(text):
 
@@ -172,7 +172,7 @@ def validate_gross_weight(text):
     if match:
         return f"{match.group(1)} KG"
        
-    return 'KG'
+    return '0 KG'
 
 def validate_Lenght_Width_Height(text):
     pattern = r'(\d{1,3})'
@@ -236,7 +236,7 @@ def validate_date_of_first_registration(text):
     if re.match(pattern, text):
         return text.strip()
     
-    return ''
+    return 'XX/XX/XXXX'
 
 def validate_fuel_type(text):
         

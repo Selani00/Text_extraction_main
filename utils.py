@@ -37,8 +37,8 @@ labels= [
 
 word_lists = {
     "Class of Vehicle": ["Motor Car", "Motor Cycle", "Motor Lorry", "Motor Coach", "Dual Purpose Vehicle"],
-    "Taxation class": ["Private Car", "Motor Cycle", "Three-Wheeler", "Dual Purpose Vehicle", "Heavy Goods Vehicle"],
-    "Manufacture Description" : ["Private Car", "Motor Cycle", "Three-Wheeler", "Dual Purpose Vehicle", "Heavy Goods Vehicle"],
+    # "Taxation class": ["Private Car", "Motor Cycle", "Three-Wheeler", "Dual Purpose Vehicle", "Heavy Goods Vehicle"],
+    # "Manufacture Description" : ["Private Car", "Motor Cycle", "Three-Wheeler", "Dual Purpose Vehicle", "Heavy Goods Vehicle"],
     "Status when Registered": ["Brand New", "Suspended", "Cancelled", "Transferred", "Pending", "De-registered", "Expired"],
     "Fuel Type": ["Petrol", "Diesel", "Electric", "Hybrid", "LPG"],
     "Make": ["HERO", "Toyota", "Honda", "Nissan", "Suzuki", "Mitsubishi"],
