@@ -13,8 +13,9 @@ labels= [
     'Status when Registered',
     'Fuel Type',
     'Make',
-    'Country of Origin',
     'Model',
+    'Country of Origin',
+    
     # 'Manufacture Description',
     # 'Wheel Base',
     # 'Over Hang',
@@ -67,8 +68,8 @@ boxes = [
     (100, 1840, 1000, 60),  # Status when Registered
     (1260, 1840, 1000, 60),  # Fuel Type
     (100, 1940, 1000, 60),  # Make
-    (1260, 1940, 1000, 60),  # Country of Origin
     (100, 2040, 1000, 60),  # Model
+    (1260, 1940, 1000, 60),  # Country of Origin   
     # (1260, 2035, 1000, 60),  # Manufacture Description
     # (100, 2140, 1000, 60),  # Wheel Base
     # (1260, 2140, 1000, 60),  # Over Hang

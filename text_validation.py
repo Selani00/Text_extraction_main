@@ -64,7 +64,11 @@ def validate_extracted_text(field_label, text,registration_number):
     return text
 
 def validate_model(text):
-    cleaned_text = re.sub(r'[^A-Za-z0-9]{10,20}$', '', text)
+    cleaned_text = re.sub(r'[^A-Za-z0-9]+$', '', text)
+
+    if len(cleaned_text) > 25:
+        return ''
+    
     return cleaned_text.strip()
 
 def validate_make(text):

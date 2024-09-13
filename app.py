@@ -14,6 +14,7 @@ import random
 from utils import labels, boxes,word_lists
 from functions import calculate_visibility, clear_image, identify_image_type,save_data_to_excel,correct_word_ignore_case
 from text_validation import validate_extracted_text
+from model import predict_country_of_origin
 
 app = Flask(__name__)
 
@@ -216,7 +217,6 @@ def extract_text_with_accuracy(image, Type):
 
         field_label = labels[i]
 
-        # Add to detected texts
         if text:
             if field_label in word_lists:
                 corrected_text = correct_word_ignore_case(text, word_lists[field_label])
@@ -239,6 +239,7 @@ def extract_text_with_accuracy(image, Type):
             excel_value = get_most_common_value(field_label)
             if excel_value:
                 validated_text = excel_value
+                total_confidence += 10
 
 
         # If the field is 'Registration No', update the registration_number variable
@@ -248,6 +249,21 @@ def extract_text_with_accuracy(image, Type):
             make = validated_text
         if field_label == 'Model':
             model = validated_text
+
+        if 'Country of Origin' not in validated_texts or not validated_texts['Country of Origin']:
+            if make and model:
+                make_input = make.strip()
+                model_input = model.strip()
+
+                country_of_origin = predict_country_of_origin(make_input, model_input)
+                if country_of_origin:
+                    validated_texts['Country of Origin'] = country_of_origin
+                    total_confidence += 10
+                else:
+                    validated_texts['Country of Origin'] = ''
+            else:
+                validated_texts['Country of Origin'] = ''
+
 
         validated_texts[field_label] = validated_text
 
