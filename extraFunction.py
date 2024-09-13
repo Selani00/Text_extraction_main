@@ -1,40 +1,5 @@
-from langdetect import LangDetectException
 import cv2
 import numpy as np
-
-
-# Helper function to extract text from predefined boxes
-def extract_text_from_boxes(image, Type):
-    detected_texts = {}
-    image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-
-    for i, (x, y, w, h) in enumerate(boxes):
-        # Draw the bounding box for visualization
-        cv2.rectangle(image_cv, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-        # Crop the region of interest (ROI) from the image
-        roi = image_cv[y:y + h, x:x + w]
-
-        # Clear the image if Type is 1
-        if Type == 1:
-            roi = clear_image(roi)
-
-        # Extract text using Tesseract OCR
-        custom_config = r'--oem 3 --psm 6 -l eng'
-        text = pytesseract.image_to_string(roi, config=custom_config)
-
-        # Clean and verify the extracted text using the classifier
-        if text.strip():
-            try:
-                result = classifier(text, candidate_labels=[labels[i]])
-                field_type = result['labels'][0]
-                detected_texts[field_type] = text.strip()
-            except LangDetectException:
-                continue
-
-    return detected_texts
-
-
 
 
 # Function to deskew the image based on the skew angle

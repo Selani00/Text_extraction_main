@@ -4,6 +4,21 @@ import pandas as pd
 import difflib
 from datetime import datetime
 import os
+import random
+
+# Function to get the most common value from the Excel file
+def get_most_common_value(field_label):
+    if os.path.exists('detected_text_data_n.xlsx'):
+        df = pd.read_excel('detected_text_data_n.xlsx')
+        if field_label in df.columns:
+            value_counts = df[field_label].value_counts()
+            if not value_counts.empty:
+                max_count = value_counts.max()
+                most_common_values = value_counts[value_counts == max_count].index.tolist()
+                # Randomly select one if multiple
+                selected_value = random.choice(most_common_values)
+                return selected_value
+    return None 
 
 def correct_word_ignore_case(word, possibilities):
     word_lower = word.lower()
@@ -17,7 +32,7 @@ def correct_word_ignore_case(word, possibilities):
 
 # Function to save data to the same Excel file
 def save_data_to_excel(detected_texts, accuracy, visibility, image_id):
-    excel_filename = 'detected_text_data_n.xlsx'
+    excel_filename = 'extracted_data.xlsx'
     
     # if file already exists
     if os.path.exists(excel_filename):

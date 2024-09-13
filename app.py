@@ -8,11 +8,10 @@ from transformers import pipeline
 from langdetect import LangDetectException
 import io
 import pandas as pd
-import os
-import random
+
 
 from utils import labels, boxes,word_lists
-from functions import calculate_visibility, clear_image, identify_image_type,save_data_to_excel,correct_word_ignore_case
+from functions import calculate_visibility, clear_image, identify_image_type,save_data_to_excel,correct_word_ignore_case,get_most_common_value
 from text_validation import validate_extracted_text
 from model import predict_country_of_origin
 
@@ -20,6 +19,8 @@ app = Flask(__name__)
 
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+# pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 classifier = pipeline('zero-shot-classification', model='facebook/bart-large-mnli')
 
 @app.route('/extract_text', methods=['POST'])
@@ -135,20 +136,6 @@ def adjust_box(x, y, w, h, image_cv, confidence_threshold=50):
     return new_x, new_y, box_confidence
 
 
-
-# Function to get the most common value from the Excel file
-def get_most_common_value(field_label):
-    if os.path.exists('detected_text_data_n.xlsx'):
-        df = pd.read_excel('detected_text_data_n.xlsx')
-        if field_label in df.columns:
-            value_counts = df[field_label].value_counts()
-            if not value_counts.empty:
-                max_count = value_counts.max()
-                most_common_values = value_counts[value_counts == max_count].index.tolist()
-                # Randomly select one if multiple
-                selected_value = random.choice(most_common_values)
-                return selected_value
-    return None 
 
 
 # Main function to extract text with dynamic box adjustment
@@ -267,4 +254,4 @@ def extract_text_with_accuracy(image, Type):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
